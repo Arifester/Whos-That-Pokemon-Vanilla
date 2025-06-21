@@ -1,13 +1,94 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Who's That Pokémon? Evolved</title>
+  <script type="module" src="/src/main.js"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen font-sans">
+
+  <div class="w-full max-w-lg p-6 text-center">
+
+    <div id="start-screen">
+      <h1 class="text-4xl font-bold mb-2 text-yellow-400">Who's That Pokémon?</h1>
+      <p class="text-gray-400 mb-6">Game tebak Pokémon edisi baru!</p>
+      
+      <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+        <p class="text-xl mb-4">High Score: <span id="high-score-display" class="font-bold text-yellow-300">0</span></p>
+
+        <div class="space-y-4 text-left">
+          <div>
+            <label for="difficulty-select" class="block mb-1 text-sm font-medium">Kesulitan:</label>
+            <select id="difficulty-select" class="w-full bg-gray-700 border-gray-600 rounded-md p-2">
+              <option value="easy">Gampang (15 Detik)</option>
+              <option value="normal" selected>Normal (10 Detik)</option>
+              <option value="hard">Susah (5 Detik)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block mb-2 text-sm font-medium">Pilih Generasi:</label>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
+              <label class="flex items-center space-x-2 bg-gray-700 p-2 rounded-md cursor-pointer hover:bg-gray-600">
+                <input type="checkbox" id="gen1" class="form-checkbox bg-gray-900 border-gray-500 rounded text-blue-500" checked>
+                <span>Gen 1</span>
+              </label>
+              <label class="flex items-center space-x-2 bg-gray-700 p-2 rounded-md cursor-pointer hover:bg-gray-600">
+                <input type="checkbox" id="gen2" class="form-checkbox bg-gray-900 border-gray-500 rounded text-blue-500">
+                <span>Gen 2</span>
+              </label>
+              <label class="flex items-center space-x-2 bg-gray-700 p-2 rounded-md cursor-pointer hover:bg-gray-600">
+                <input type="checkbox" id="gen3" class="form-checkbox bg-gray-900 border-gray-500 rounded text-blue-500">
+                <span>Gen 3</span>
+              </label>
+              <label class="flex items-center space-x-2 bg-gray-700 p-2 rounded-md cursor-pointer hover:bg-gray-600">
+                <input type="checkbox" id="gen4" class="form-checkbox bg-gray-900 border-gray-500 rounded text-blue-500">
+                <span>Gen 4</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <button id="start-game-btn" class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition duration-200">
+          Mulai Bermain!
+        </button>
+      </div>
+    </div>
+
+    <div id="game-screen" class="hidden">
+      <h1 class="text-2xl font-bold mb-4">Who's That Pokémon?</h1>
+      <div class="relative w-64 h-64 mx-auto bg-gray-800 rounded-lg overflow-hidden border-4 border-gray-700">
+        <img id="pokemon-image" class="w-full h-full object-contain" src="" alt="Pokémon Silhouette" />
+      </div>
+      <div id="options" class="grid grid-cols-2 gap-4 mt-4">
+        </div>
+      <div class="flex justify-between items-center mt-4 text-lg">
+        <p id="score">Score: 0</p>
+        <p id="timer" class="text-red-400 font-bold">Time: 10s</p>
+      </div>
+      <p id="feedback" class="mt-2 text-yellow-300 h-6"></p>
+       <button id="quit-game-btn" class="mt-4 w-1/2 bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg transition duration-200">
+          Keluar
+        </button>
+    </div>
+
+    <div id="game-over-screen" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center">
+      <div class="bg-gray-800 p-8 rounded-lg shadow-2xl text-center">
+        <h2 class="text-3xl font-bold mb-4">Game Over!</h2>
+        <p class="text-xl mb-2">Skor Akhir: <span id="final-score" class="font-bold text-yellow-300">0</span></p>
+        <p class="text-lg mb-6">High Score: <span id="game-over-high-score" class="font-bold text-yellow-300">0</span></p>
+        <div class="flex gap-4">
+          <button id="play-again-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+            Main Lagi
+          </button>
+          <button id="main-menu-btn" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg">
+            Menu Utama
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
 </html>

@@ -2,5 +2,6 @@
 
 /* Kelas untuk efek siluet dengan drop-shadow agar bentuknya tetap terlihat */
 .silhouette {
-  filter: brightness(0) drop-shadow(0 0 8px #ffffff);
+  filter: brightness(0) drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+  -webkit-filter: brightness(0) drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
 }
