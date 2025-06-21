@@ -19,6 +19,7 @@ let state = {
   gameSettings: {
     difficulty: 'normal',
     generations: ['gen1'],
+    mode: 'classic', // BARU: Tambahkan mode ke state
   },
 };
 
@@ -35,11 +36,13 @@ const gameElements = {
   scoreDisplay: document.getElementById('score'),
   timerDisplay: document.getElementById('timer'),
   feedbackDisplay: document.getElementById('feedback'),
+  guessDisplay: document.getElementById('guess-display'), // BARU
 };
 
 const menuElements = {
   startGameBtn: document.getElementById('start-game-btn'),
   difficultySelect: document.getElementById('difficulty-select'),
+  modeSelect: document.getElementById('mode-select'), // BARU
   genCheckboxes: document.querySelectorAll('input[type="checkbox"]'),
   highScoreDisplay: document.getElementById('high-score-display'),
 };
@@ -94,12 +97,15 @@ async function nextRound() {
   
   // Ambil Pokémon untuk jawaban & pilihan
   const correctData = await getRandomPokemon();
-  if (!correctData) return; // Berhenti jika tidak ada pokemon valid
-
-  state.correctPokemon = correctData.name;
+  if (!correctData) {
+      showScreen('start'); // Kembali ke menu jika tidak ada pokemon
+      return;
+  }; 
+  
+  state.correctPokemon = correctData;
   gameElements.pokemonImage.src = correctData.image;
 
-  const options = new Set([state.correctPokemon]);
+  const options = new Set([state.correctPokemon.name]);
   while (options.size < 4) {
     const randomOption = (await getRandomPokemon()).name;
     options.add(randomOption);
@@ -126,22 +132,27 @@ function checkAnswer(selectedOption) {
   clearInterval(state.timer);
 
   gameElements.pokemonImage.classList.remove('silhouette');
+  state.attempts++;
 
-  if (selectedOption === state.correctPokemon) {
+  if (selectedOption === state.correctPokemon.name) {
     state.score++;
     gameElements.feedbackDisplay.textContent = 'Jawaban Benar!';
     gameElements.feedbackDisplay.classList.remove('text-red-500');
     gameElements.feedbackDisplay.classList.add('text-green-400');
   } else {
-    gameElements.feedbackDisplay.textContent = `Salah! Jawabannya adalah ${state.correctPokemon}`;
+    gameElements.feedbackDisplay.textContent = `Salah! Jawabannya adalah ${state.correctPokemon.name}`;
     gameElements.feedbackDisplay.classList.remove('text-green-400');
     gameElements.feedbackDisplay.classList.add('text-red-500');
   }
   
-  state.attempts++;
   updateScoreUI();
+  updateGuessDisplay(); // BARU: Update tampilan tebakan
 
-  if (state.attempts >= TOTAL_GUESSES) {
+  // DIUBAH: Logika game over disesuaikan dengan mode permainan
+  const isClassicModeOver = state.gameSettings.mode === 'classic' && state.attempts >= TOTAL_GUESSES;
+  const isEndlessModeOver = state.gameSettings.mode === 'endless' && selectedOption !== state.correctPokemon.name;
+
+  if (isClassicModeOver || isEndlessModeOver) {
     setTimeout(endGame, 2000);
   } else {
     setTimeout(nextRound, 2000);
@@ -178,20 +189,37 @@ function updateScoreUI() {
   gameElements.scoreDisplay.textContent = `Score: ${state.score}`;
 }
 
+// BARU: Fungsi untuk mengupdate tampilan jumlah tebakan
+function updateGuessDisplay() {
+    if (state.gameSettings.mode === 'classic') {
+        gameElements.guessDisplay.textContent = `Tebakan: ${state.attempts} / ${TOTAL_GUESSES}`;
+        gameElements.guessDisplay.classList.remove('hidden');
+    } else {
+        gameElements.guessDisplay.classList.add('hidden');
+    }
+}
+
 /** Memulai permainan */
 function startGame() {
   // Ambil pengaturan dari menu
   state.gameSettings.difficulty = menuElements.difficultySelect.value;
+  state.gameSettings.mode = menuElements.modeSelect.value; // BARU: Baca mode permainan
   const selectedGens = [];
   menuElements.genCheckboxes.forEach(box => {
       if (box.checked) selectedGens.push(box.id);
   });
   state.gameSettings.generations = selectedGens;
+  
+  if (state.gameSettings.generations.length === 0) {
+      alert("Pilih minimal satu generasi untuk bermain!");
+      return;
+  }
 
   // Reset state game
   state.score = 0;
   state.attempts = 0;
   updateScoreUI();
+  updateGuessDisplay(); // BARU: Panggil saat game mulai
 
   showScreen('game');
   nextRound();
