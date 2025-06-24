@@ -180,8 +180,19 @@ function startTimer() {
 
 /** Mengubah layar yang ditampilkan */
 function showScreen(screenName) {
-  Object.values(screens).forEach(screen => screen.classList.add('hidden'));
-  screens[screenName].classList.remove('hidden');
+  Object.entries(screens).forEach(([name, screen]) => {
+    screen.classList.add('hidden');
+    if (name === 'gameOver') {
+      screen.classList.remove('flex'); // hanya hapus dari gameOver
+    }
+  });
+
+  const targetScreen = screens[screenName];
+  targetScreen.classList.remove('hidden');
+
+  if (screenName === 'gameOver') {
+    targetScreen.classList.add('flex'); // aktifkan kembali
+  }
 }
 
 /** Mengupdate tampilan skor */
