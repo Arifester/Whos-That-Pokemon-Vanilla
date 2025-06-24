@@ -1,104 +1,22 @@
+// src/main.js
 import './style.css';
 
-// === KONSTANTA & STATE ===
-const API_URL = "https://pokeapi.co/api/v2/pokemon/";
-const GEN_RANGES = {
-  gen1: { offset: 0, limit: 151 },
-  gen2: { offset: 151, limit: 100 },
-  gen3: { offset: 251, limit: 135 },
-  gen4: { offset: 386, limit: 107 },
-};
-const TOTAL_GUESSES = 10; // Mode Klasik
+// Impor semua modul yang kita butuhkan
+import { state, getHighScore, saveHighScore, saveToCollection, getCollection, TOTAL_GUESSES } from './modules/state.js';
+import { getRandomPokemon } from './modules/api.js';
+import { screens, gameElements, menuElements, pokedexElements, gameOverElements, showScreen, updateScoreUI, updateGuessDisplay, renderPokedex } from './modules/ui.js';
 
-let state = {
-  score: 0,
-  attempts: 0,
-  correctPokemon: null,
-  timer: null,
-  answerSubmitted: false,
-  gameSettings: {
-    difficulty: 'normal',
-    generations: ['gen1'],
-    mode: 'classic', // BARU: Tambahkan mode ke state
-  },
-};
+// === FUNGSI ALUR GAME UTAMA ===
 
-// === ELEMEN DOM ===
-const screens = {
-  start: document.getElementById('start-screen'),
-  game: document.getElementById('game-screen'),
-  gameOver: document.getElementById('game-over-screen'),
-};
-
-const gameElements = {
-  pokemonImage: document.getElementById('pokemon-image'),
-  optionsContainer: document.getElementById('options'),
-  scoreDisplay: document.getElementById('score'),
-  timerDisplay: document.getElementById('timer'),
-  feedbackDisplay: document.getElementById('feedback'),
-  guessDisplay: document.getElementById('guess-display'), // BARU
-};
-
-const menuElements = {
-  startGameBtn: document.getElementById('start-game-btn'),
-  difficultySelect: document.getElementById('difficulty-select'),
-  modeSelect: document.getElementById('mode-select'), // BARU
-  genCheckboxes: document.querySelectorAll('input[type="checkbox"]'),
-  highScoreDisplay: document.getElementById('high-score-display'),
-};
-
-const gameOverElements = {
-  finalScore: document.getElementById('final-score'),
-  gameOverHighScore: document.getElementById('game-over-high-score'),
-  playAgainBtn: document.getElementById('play-again-btn'),
-  mainMenuBtn: document.getElementById('main-menu-btn'),
-};
-
-document.getElementById('quit-game-btn').addEventListener('click', endGame);
-
-
-// === FUNGSI UTAMA GAME ===
-
-/** Mengambil ID Pokémon yang valid berdasarkan generasi yang dipilih */
-function getValidPokemonIds() {
-  let ids = [];
-  state.gameSettings.generations.forEach(gen => {
-    const { offset, limit } = GEN_RANGES[gen];
-    for (let i = 1; i <= limit; i++) {
-      ids.push(offset + i);
-    }
-  });
-  return ids;
-}
-
-/** Mengambil data Pokémon secara acak */
-async function getRandomPokemon() {
-  const validIds = getValidPokemonIds();
-  if (validIds.length === 0) {
-      alert("Pilih minimal satu generasi untuk bermain!");
-      return null;
-  }
-  const randomId = validIds[Math.floor(Math.random() * validIds.length)];
-  const response = await fetch(`${API_URL}${randomId}`);
-  const data = await response.json();
-  return {
-    name: data.name,
-    image: data.sprites.other['official-artwork'].front_default,
-  };
-}
-
-/** Memulai babak baru */
 async function nextRound() {
-  // Reset state & UI untuk babak baru
   state.answerSubmitted = false;
   gameElements.feedbackDisplay.textContent = '';
   gameElements.pokemonImage.classList.add('silhouette');
   gameElements.optionsContainer.innerHTML = 'Memuat Pokémon...';
   
-  // Ambil Pokémon untuk jawaban & pilihan
-  const correctData = await getRandomPokemon();
+  const correctData = await getRandomPokemon(state.gameSettings.generations);
   if (!correctData) {
-      showScreen('start'); // Kembali ke menu jika tidak ada pokemon
+      showScreen('start');
       return;
   }; 
   
@@ -107,11 +25,10 @@ async function nextRound() {
 
   const options = new Set([state.correctPokemon.name]);
   while (options.size < 4) {
-    const randomOption = (await getRandomPokemon()).name;
+    const randomOption = (await getRandomPokemon(state.gameSettings.generations)).name;
     options.add(randomOption);
   }
 
-  // Acak dan tampilkan pilihan
   const shuffledOptions = Array.from(options).sort(() => Math.random() - 0.5);
   gameElements.optionsContainer.innerHTML = '';
   shuffledOptions.forEach(option => {
@@ -125,7 +42,6 @@ async function nextRound() {
   startTimer();
 }
 
-/** Memeriksa jawaban yang dipilih */
 function checkAnswer(selectedOption) {
   if (state.answerSubmitted) return;
   state.answerSubmitted = true;
@@ -139,6 +55,7 @@ function checkAnswer(selectedOption) {
     gameElements.feedbackDisplay.textContent = 'Jawaban Benar!';
     gameElements.feedbackDisplay.classList.remove('text-red-500');
     gameElements.feedbackDisplay.classList.add('text-green-400');
+    saveToCollection(state.correctPokemon);
   } else {
     gameElements.feedbackDisplay.textContent = `Salah! Jawabannya adalah ${state.correctPokemon.name}`;
     gameElements.feedbackDisplay.classList.remove('text-green-400');
@@ -146,9 +63,8 @@ function checkAnswer(selectedOption) {
   }
   
   updateScoreUI();
-  updateGuessDisplay(); // BARU: Update tampilan tebakan
+  updateGuessDisplay();
 
-  // DIUBAH: Logika game over disesuaikan dengan mode permainan
   const isClassicModeOver = state.gameSettings.mode === 'classic' && state.attempts >= TOTAL_GUESSES;
   const isEndlessModeOver = state.gameSettings.mode === 'endless' && selectedOption !== state.correctPokemon.name;
 
@@ -159,7 +75,6 @@ function checkAnswer(selectedOption) {
   }
 }
 
-/** Memulai timer */
 function startTimer() {
   const DURATION_MAP = { easy: 15, normal: 10, hard: 5 };
   let timeLeft = DURATION_MAP[state.gameSettings.difficulty];
@@ -170,51 +85,14 @@ function startTimer() {
     gameElements.timerDisplay.textContent = `Time: ${timeLeft}s`;
     if (timeLeft <= 0) {
       clearInterval(state.timer);
-      checkAnswer(null); // Waktu habis dianggap jawaban salah
+      checkAnswer(null);
     }
   }, 1000);
 }
 
-
-// === FUNGSI MANAJEMEN STATE & UI ===
-
-/** Mengubah layar yang ditampilkan */
-function showScreen(screenName) {
-  Object.entries(screens).forEach(([name, screen]) => {
-    screen.classList.add('hidden');
-    if (name === 'gameOver') {
-      screen.classList.remove('flex'); // hanya hapus dari gameOver
-    }
-  });
-
-  const targetScreen = screens[screenName];
-  targetScreen.classList.remove('hidden');
-
-  if (screenName === 'gameOver') {
-    targetScreen.classList.add('flex'); // aktifkan kembali
-  }
-}
-
-/** Mengupdate tampilan skor */
-function updateScoreUI() {
-  gameElements.scoreDisplay.textContent = `Score: ${state.score}`;
-}
-
-// BARU: Fungsi untuk mengupdate tampilan jumlah tebakan
-function updateGuessDisplay() {
-    if (state.gameSettings.mode === 'classic') {
-        gameElements.guessDisplay.textContent = `Tebakan: ${state.attempts} / ${TOTAL_GUESSES}`;
-        gameElements.guessDisplay.classList.remove('hidden');
-    } else {
-        gameElements.guessDisplay.classList.add('hidden');
-    }
-}
-
-/** Memulai permainan */
 function startGame() {
-  // Ambil pengaturan dari menu
   state.gameSettings.difficulty = menuElements.difficultySelect.value;
-  state.gameSettings.mode = menuElements.modeSelect.value; // BARU: Baca mode permainan
+  state.gameSettings.mode = menuElements.modeSelect.value;
   const selectedGens = [];
   menuElements.genCheckboxes.forEach(box => {
       if (box.checked) selectedGens.push(box.id);
@@ -226,17 +104,15 @@ function startGame() {
       return;
   }
 
-  // Reset state game
   state.score = 0;
   state.attempts = 0;
   updateScoreUI();
-  updateGuessDisplay(); // BARU: Panggil saat game mulai
+  updateGuessDisplay();
 
   showScreen('game');
   nextRound();
 }
 
-/** Mengakhiri permainan */
 function endGame() {
   clearInterval(state.timer);
   const highScore = getHighScore();
@@ -249,18 +125,20 @@ function endGame() {
   showScreen('gameOver');
 }
 
-/** Fungsi untuk localStorage */
-function getHighScore() {
-  return localStorage.getItem('pokemonHighScore') || 0;
-}
-
-function saveHighScore(score) {
-  localStorage.setItem('pokemonHighScore', score);
-}
-
-/** Inisialisasi awal */
+// === INISIALISASI APLIKASI ===
 function init() {
+  document.getElementById('quit-game-btn').addEventListener('click', endGame);
+  
   menuElements.startGameBtn.addEventListener('click', startGame);
+  menuElements.viewCollectionBtn.addEventListener('click', () => {
+      renderPokedex(getCollection());
+      showScreen('pokedex');
+  });
+
+  pokedexElements.closeBtn.addEventListener('click', () => {
+      showScreen('start');
+  });
+
   gameOverElements.playAgainBtn.addEventListener('click', startGame);
   gameOverElements.mainMenuBtn.addEventListener('click', () => {
     menuElements.highScoreDisplay.textContent = getHighScore();
@@ -271,5 +149,4 @@ function init() {
   showScreen('start');
 }
 
-// === MULAI APLIKASI ===
 init();
