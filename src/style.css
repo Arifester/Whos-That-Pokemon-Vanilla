@@ -7,5 +7,15 @@
 }
 
 .pokedex-card {
-    @apply bg-gray-700 p-3 rounded-lg text-center transition-transform duration-200 hover:scale-105 hover:bg-gray-600;
+    background-color: #374151; /* bg-gray-700 */
+    padding: 0.75rem; /* p-3 */
+    border-radius: 0.5rem; /* rounded-lg */
+    text-align: center; /* text-center */
+    transition-property: transform, background-color; /* transition-transform */
+    transition-duration: 200ms; /* duration-200 */
+}
+
+.pokedex-card:hover {
+    transform: scale(1.05); /* hover:scale-105 */
+    background-color: #4b5563; /* hover:bg-gray-600 */
 }
