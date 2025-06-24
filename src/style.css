@@ -5,3 +5,7 @@
   filter: brightness(0) drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
   -webkit-filter: brightness(0) drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
 }
+
+.pokedex-card {
+    @apply bg-gray-700 p-3 rounded-lg text-center transition-transform duration-200 hover:scale-105 hover:bg-gray-600;
+}
