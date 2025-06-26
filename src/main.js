@@ -48,6 +48,24 @@ function checkAnswer(selectedOption) {
   clearInterval(state.timer);
 
   gameElements.pokemonImage.classList.remove('silhouette');
+
+  // Nonaktifkan semua tombol agar tidak bisa diklik lagi
+  const allButtons = gameElements.optionsContainer.querySelectorAll('button');
+  allButtons.forEach(button => {
+    button.disabled = true;
+    // Hapus efek hover agar terlihat tidak aktif
+    button.classList.remove('hover:bg-blue-700'); 
+  });
+
+  // Cari tombol yang benar dan beri warna hijau
+  allButtons.forEach(button => {
+    // Gunakan textContent untuk mencocokkan nama, sesuaikan jika perlu
+    if (button.textContent.toLowerCase() === state.correctPokemon.name) {
+      button.classList.remove('bg-blue-600');
+      button.classList.add('bg-green-500'); // Warna hijau untuk jawaban benar
+    }
+  });
+
   state.attempts++;
 
   if (selectedOption === state.correctPokemon.name) {
@@ -57,6 +75,14 @@ function checkAnswer(selectedOption) {
     gameElements.feedbackDisplay.classList.add('text-green-400');
     saveToCollection(state.correctPokemon);
   } else {
+    // Jika jawaban yang dipilih salah, beri warna merah pada pilihan tersebut
+    allButtons.forEach(button => {
+        if (button.textContent.toLowerCase() === selectedOption) {
+            button.classList.remove('bg-blue-600');
+            button.classList.add('bg-red-500'); // Warna merah untuk jawaban salah
+        }
+    });
+
     gameElements.feedbackDisplay.textContent = `Salah! Jawabannya adalah ${state.correctPokemon.name}`;
     gameElements.feedbackDisplay.classList.remove('text-green-400');
     gameElements.feedbackDisplay.classList.add('text-red-500');
