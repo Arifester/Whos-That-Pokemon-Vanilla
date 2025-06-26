@@ -69,12 +69,14 @@ function checkAnswer(selectedOption) {
   state.attempts++;
 
   if (selectedOption === state.correctPokemon.name) {
+    new Audio('/correct-answer.mp3').play();
     state.score++;
     gameElements.feedbackDisplay.textContent = 'Jawaban Benar!';
     gameElements.feedbackDisplay.classList.remove('text-red-500');
     gameElements.feedbackDisplay.classList.add('text-green-400');
     saveToCollection(state.correctPokemon);
   } else {
+    new Audio('/wrong-answer.mp3').play(); 
     // Jika jawaban yang dipilih salah, beri warna merah pada pilihan tersebut
     allButtons.forEach(button => {
         if (button.textContent.toLowerCase() === selectedOption) {
