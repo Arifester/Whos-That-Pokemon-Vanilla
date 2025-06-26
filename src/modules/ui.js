@@ -43,8 +43,14 @@ export const gameOverElements = {
 // === FUNGSI MANAJEMEN UI ===
 
 export function showScreen(screenName) {
-  Object.values(screens).forEach(screen => screen.classList.add('hidden'));
-  screens[screenName].classList.remove('hidden');
+  // Sembunyikan semua layar terlebih dahulu
+  Object.values(screens).forEach(screen => {
+    screen.classList.add('screen-hidden');
+  });
+
+  // Tampilkan layar yang dituju
+  const targetScreen = screens[screenName];
+  targetScreen.classList.remove('screen-hidden');
 }
 
 export function updateScoreUI() {

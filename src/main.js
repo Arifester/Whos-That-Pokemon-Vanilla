@@ -8,6 +8,9 @@ import { screens, gameElements, menuElements, pokedexElements, gameOverElements,
 
 // === FUNGSI ALUR GAME UTAMA ===
 
+// BARU: Variabel untuk menyimpan ID dari setTimeout
+let nextRoundTimeoutId = null; 
+
 async function nextRound() {
   state.answerSubmitted = false;
   gameElements.feedbackDisplay.textContent = '';
@@ -34,7 +37,11 @@ async function nextRound() {
   shuffledOptions.forEach(option => {
     const button = document.createElement('button');
     button.textContent = option.charAt(0).toUpperCase() + option.slice(1);
+    // DIUBAH: Pastikan tombol diaktifkan kembali
+    button.disabled = false;
     button.classList.add('bg-blue-600', 'hover:bg-blue-700', 'text-white', 'p-3', 'rounded-lg', 'transition', 'duration-200');
+    // Hapus style jawaban sebelumnya jika ada
+    button.classList.remove('bg-green-500', 'bg-red-500');
     button.addEventListener('click', () => checkAnswer(option));
     gameElements.optionsContainer.appendChild(button);
   });
@@ -49,20 +56,16 @@ function checkAnswer(selectedOption) {
 
   gameElements.pokemonImage.classList.remove('silhouette');
 
-  // Nonaktifkan semua tombol agar tidak bisa diklik lagi
   const allButtons = gameElements.optionsContainer.querySelectorAll('button');
   allButtons.forEach(button => {
     button.disabled = true;
-    // Hapus efek hover agar terlihat tidak aktif
     button.classList.remove('hover:bg-blue-700'); 
   });
 
-  // Cari tombol yang benar dan beri warna hijau
   allButtons.forEach(button => {
-    // Gunakan textContent untuk mencocokkan nama, sesuaikan jika perlu
     if (button.textContent.toLowerCase() === state.correctPokemon.name) {
       button.classList.remove('bg-blue-600');
-      button.classList.add('bg-green-500'); // Warna hijau untuk jawaban benar
+      button.classList.add('bg-green-500');
     }
   });
 
@@ -77,11 +80,10 @@ function checkAnswer(selectedOption) {
     saveToCollection(state.correctPokemon);
   } else {
     new Audio('/wrong-answer.mp3').play(); 
-    // Jika jawaban yang dipilih salah, beri warna merah pada pilihan tersebut
     allButtons.forEach(button => {
         if (button.textContent.toLowerCase() === selectedOption) {
             button.classList.remove('bg-blue-600');
-            button.classList.add('bg-red-500'); // Warna merah untuk jawaban salah
+            button.classList.add('bg-red-500');
         }
     });
 
@@ -97,13 +99,18 @@ function checkAnswer(selectedOption) {
   const isEndlessModeOver = state.gameSettings.mode === 'endless' && selectedOption !== state.correctPokemon.name;
 
   if (isClassicModeOver || isEndlessModeOver) {
-    setTimeout(endGame, 2000);
+    // DIUBAH: Simpan ID timeout
+    nextRoundTimeoutId = setTimeout(endGame, 2000);
   } else {
-    setTimeout(nextRound, 2000);
+    // DIUBAH: Simpan ID timeout
+    nextRoundTimeoutId = setTimeout(nextRound, 2000);
   }
 }
 
 function startTimer() {
+  // DIUBAH: Pastikan timer lama selalu bersih sebelum membuat yang baru
+  clearInterval(state.timer); 
+
   const DURATION_MAP = { easy: 15, normal: 10, hard: 5 };
   let timeLeft = DURATION_MAP[state.gameSettings.difficulty];
   gameElements.timerDisplay.textContent = `Time: ${timeLeft}s`;
@@ -113,12 +120,18 @@ function startTimer() {
     gameElements.timerDisplay.textContent = `Time: ${timeLeft}s`;
     if (timeLeft <= 0) {
       clearInterval(state.timer);
-      checkAnswer(null);
+      if (!state.answerSubmitted) {
+        checkAnswer(null);
+      }
     }
   }, 1000);
 }
 
 function startGame() {
+  // DIUBAH: Tambahkan pembersihan menyeluruh di awal game
+  clearInterval(state.timer);
+  clearTimeout(nextRoundTimeoutId);
+
   state.gameSettings.difficulty = menuElements.difficultySelect.value;
   state.gameSettings.mode = menuElements.modeSelect.value;
   const selectedGens = [];
@@ -142,7 +155,10 @@ function startGame() {
 }
 
 function endGame() {
+  // DIUBAH: Jadikan endGame sebagai satu-satunya pembersih utama
   clearInterval(state.timer);
+  clearTimeout(nextRoundTimeoutId);
+  
   const highScore = getHighScore();
   if (state.score > highScore) {
     saveHighScore(state.score);
@@ -168,9 +184,13 @@ function init() {
   });
 
   gameOverElements.playAgainBtn.addEventListener('click', startGame);
+
+  // DIUBAH: Tombol Menu Utama sekarang juga harus membersihkan game
   gameOverElements.mainMenuBtn.addEventListener('click', () => {
-    menuElements.highScoreDisplay.textContent = getHighScore();
-    showScreen('start');
+    endGame(); // Hentikan dan bersihkan game
+    showScreen('start'); // Baru tampilkan menu utama
+    // Tampilkan high score lagi setelah kembali ke menu
+    menuElements.highScoreDisplay.textContent = getHighScore(); 
   });
 
   menuElements.highScoreDisplay.textContent = getHighScore();

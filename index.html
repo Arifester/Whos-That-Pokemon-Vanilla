@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Who's That Pokémon? Evolved</title>
+  <title>Who's That Pokémon Vanilla Version?</title>
   <script type="module" src="/src/main.js"></script>
 </head>
 <body class="bg-gray-900 text-white flex items-center justify-center min-h-screen font-sans">
 
-  <div class="w-full max-w-lg p-6 text-center">
+  <div class="relative w-full max-w-lg p-6 text-center">
     
-    <div id="start-screen">
+    <div id="start-screen" class="screen">
       <h1 class="text-4xl font-bold mb-2 text-yellow-400">Who's That Pokémon?</h1>
       <p class="text-gray-400 mb-6">Game tebak Pokémon edisi baru!</p>
 
@@ -67,7 +67,7 @@
       </div>
     </div>
 
-    <div id="game-screen" class="hidden">
+    <div id="game-screen" class="screen screen-hidden">
       <h1 class="text-2xl font-bold mb-4">Who's That Pokémon?</h1>
       <div class="relative w-64 h-64 mx-auto bg-gray-800 rounded-lg overflow-hidden border-4 border-gray-700">
         <img id="pokemon-image" class="w-full h-full object-contain" src="" alt="Pokémon Silhouette" />
@@ -85,7 +85,7 @@
     </div>
   </div>
 
-  <div id="game-over-screen" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-40">
+  <div id="game-over-screen" class="screen screen-hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-40">
     <div class="w-11/12 sm:w-full max-w-md bg-gray-800 p-8 rounded-lg shadow-2xl text-center">
       <h2 class="text-3xl font-bold mb-4">Game Over!</h2>
       <p class="text-xl mb-2">Skor Akhir: <span id="final-score" class="font-bold text-yellow-300">0</span></p>
@@ -101,7 +101,7 @@
     </div>
   </div>
 
-  <div id="pokedex-screen" class="fixed inset-0 bg-black bg-opacity-85 flex items-center justify-center p-4 z-50">
+  <div id="pokedex-screen" class="screen screen-hidden fixed inset-0 bg-black bg-opacity-85 flex items-center justify-center p-4 z-50">
     <div class="bg-gray-800 p-6 rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-3xl font-bold text-yellow-400">Koleksi Pokémon</h2>

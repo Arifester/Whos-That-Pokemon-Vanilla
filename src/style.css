@@ -19,3 +19,15 @@
     transform: scale(1.05); /* hover:scale-105 */
     background-color: #4b5563; /* hover:bg-gray-600 */
 }
+
+.screen {
+  transition-property: opacity;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); /* ease-in-out */
+}
+
+.screen-hidden {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+}
