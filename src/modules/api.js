@@ -1,5 +1,4 @@
 // src/modules/api.js
-
 const API_URL = "https://pokeapi.co/api/v2/pokemon/";
 const GEN_RANGES = {
   gen1: { offset: 0, limit: 151 },
@@ -34,7 +33,31 @@ export async function getRandomPokemon(generations) {
   const response = await fetch(`${API_URL}${randomId}`);
   const data = await response.json();
   return {
+    id: data.id,
     name: data.name,
     image: data.sprites.other['official-artwork'].front_default,
   };
+}
+
+let allPokemonList = []; // Cache untuk menyimpan daftar
+
+export async function fetchAllPokemon() {
+    // Jika daftar sudah ada di cache, langsung kembalikan
+    if (allPokemonList.length > 0) {
+        return allPokemonList;
+    }
+
+    // Ambil daftar nama dan URL dari API (total 1025 Pokémon Gen 1-9)
+    const response = await fetch(`${API_URL}?limit=1025`);
+    const data = await response.json();
+    
+    // Proses data agar sesuai dengan format yang kita butuhkan
+    allPokemonList = data.results.map((pokemon, index) => ({
+        id: index + 1,
+        name: pokemon.name,
+        // Kita bisa "menebak" URL gambar dari ID-nya untuk efisiensi
+        image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${index + 1}.png`
+    }));
+
+    return allPokemonList;
 }

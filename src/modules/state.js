@@ -32,7 +32,7 @@ export function getCollection() {
 
 export function saveToCollection(pokemon) {
     const collection = getCollection();
-    if (!collection.some(p => p.name === pokemon.name)) {
+    if (!collection.some(p => p.id === pokemon.id)) {
         collection.push(pokemon);
         localStorage.setItem('pokemonCollection', JSON.stringify(collection));
     }
