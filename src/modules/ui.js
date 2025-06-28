@@ -1,5 +1,6 @@
 // src/modules/ui.js
 import { state, TOTAL_GUESSES } from './state.js';
+import { getCollection } from './state.js';
 
 // === ELEMEN DOM ===
 // Definisikan dan ekspor elemen agar bisa dipakai di main.js untuk event listener
@@ -82,6 +83,56 @@ export function renderPokedex(collection) {
         card.innerHTML = `
             <img src="${pokemon.image}" alt="${pokemon.name}" class="w-full h-auto">
             <p class="text-sm font-bold capitalize mt-2">${pokemon.name}</p>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+// Definisikan rentang ID generasi di sini agar UI tahu cara memfilter
+const GEN_FILTER_RANGES = {
+    "1": [1, 151], "2": [152, 251], "3": [252, 386], "4": [387, 493], "5": [494, 649],
+    "6": [650, 721], "7": [722, 809], "8": [810, 905], "9": [906, 1025]
+};
+
+export function renderAlmanac(allPokemon, filters) {
+    const grid = pokedexElements.grid;
+    grid.innerHTML = '<p class="col-span-full text-center">Loading...</p>'; // Tampilkan loading
+    
+    const unlockedCollection = getCollection();
+    const unlockedIds = new Set(unlockedCollection.map(p => p.id));
+
+    // 1. Terapkan filter generasi
+    let filteredPokemon = allPokemon;
+    if (filters.generation !== 'all') {
+        const [start, end] = GEN_FILTER_RANGES[filters.generation];
+        filteredPokemon = allPokemon.filter(p => p.id >= start && p.id <= end);
+    }
+
+    // 2. Terapkan filter "Revealed Only"
+    if (filters.revealedOnly) {
+        filteredPokemon = filteredPokemon.filter(p => unlockedIds.has(p.id));
+    }
+
+    grid.innerHTML = ''; // Kosongkan grid
+
+    if (filteredPokemon.length === 0) {
+        grid.innerHTML = `<p class="col-span-full text-center text-gray-400">Tidak ada Pokémon yang cocok dengan filter ini.</p>`;
+        return;
+    }
+
+    // 3. Render setiap kartu Pokémon
+    filteredPokemon.forEach(pokemon => {
+        const isUnlocked = unlockedIds.has(pokemon.id);
+        const card = document.createElement('div');
+        card.className = 'pokedex-card flex flex-col items-center justify-start';
+        
+        const nameDisplay = isUnlocked ? pokemon.name : '?????';
+        const imageClass = isUnlocked ? '' : 'silhouette';
+
+        card.innerHTML = `
+            <span class="text-xs font-mono text-gray-400">#${String(pokemon.id).padStart(4, '0')}</span>
+            <img src="${pokemon.image}" alt="${pokemon.name}" class="w-full h-auto ${imageClass}" style="image-rendering: pixelated;">
+            <p class="text-sm font-bold capitalize mt-1 h-5">${nameDisplay}</p>
         `;
         grid.appendChild(card);
     });

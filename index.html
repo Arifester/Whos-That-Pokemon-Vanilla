@@ -122,12 +122,32 @@
   </div>
 
   <div id="pokedex-screen" class="screen screen-hidden fixed inset-0 bg-black bg-opacity-85 flex items-center justify-center p-4 z-50">
-    <div class="bg-gray-800 p-6 rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-3xl font-bold text-yellow-400">Koleksi Pokémon</h2>
+    <div class="bg-gray-800 p-6 rounded-lg shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-center mb-4 flex-wrap gap-4">
+        <h2 class="text-3xl font-bold text-yellow-400">Almanak Pokédex</h2>
+        <div id="pokedex-filters" class="flex flex-wrap gap-2">
+            <button data-filter="all" class="pokedex-filter-btn active">All</button>
+            <button data-filter="1" class="pokedex-filter-btn">Gen 1</button>
+            <button data-filter="2" class="pokedex-filter-btn">Gen 2</button>
+            <button data-filter="3" class="pokedex-filter-btn">Gen 3</button>
+            <button data-filter="4" class="pokedex-filter-btn">Gen 4</button>
+            <button data-filter="5" class="pokedex-filter-btn">Gen 5</button>
+            <button data-filter="6" class="pokedex-filter-btn">Gen 6</button>
+            <button data-filter="7" class="pokedex-filter-btn">Gen 7</button>
+            <button data-filter="8" class="pokedex-filter-btn">Gen 8</button>
+            <button data-filter="9" class="pokedex-filter-btn">Gen 9</button>
+        </div>
+        <label class="flex items-center cursor-pointer">
+            <span class="mr-3 text-sm font-medium text-gray-300">Revealed Only</span>
+            <div class="relative">
+                <input type="checkbox" id="revealed-only-toggle" class="sr-only">
+                <div class="w-10 h-4 bg-gray-600 rounded-full shadow-inner"></div>
+                <div class="dot absolute w-6 h-6 bg-white rounded-full shadow -left-1 -top-1 transition"></div>
+            </div>
+        </label>
         <button id="close-pokedex-btn" class="text-3xl leading-none font-bold text-white hover:text-red-500">&times;</button>
       </div>
-      <div id="pokedex-grid" class="overflow-y-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <div id="pokedex-grid" class="overflow-y-auto grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4">
         </div>
     </div>
   </div>
