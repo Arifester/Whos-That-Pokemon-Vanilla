@@ -3,7 +3,6 @@ import { state, TOTAL_GUESSES } from './state.js';
 import { getCollection } from './state.js';
 
 // === ELEMEN DOM ===
-// Definisikan dan ekspor elemen agar bisa dipakai di main.js untuk event listener
 export const screens = {
   start: document.getElementById('start-screen'),
   game: document.getElementById('game-screen'),
@@ -44,12 +43,9 @@ export const gameOverElements = {
 // === FUNGSI MANAJEMEN UI ===
 
 export function showScreen(screenName) {
-  // Sembunyikan semua layar terlebih dahulu
   Object.values(screens).forEach(screen => {
     screen.classList.add('screen-hidden');
   });
-
-  // Tampilkan layar yang dituju
   const targetScreen = screens[screenName];
   targetScreen.classList.remove('screen-hidden');
 }
@@ -67,27 +63,6 @@ export function updateGuessDisplay() {
     }
 }
 
-export function renderPokedex(collection) {
-    const grid = pokedexElements.grid;
-    grid.innerHTML = ''; 
-
-    if (collection.length === 0) {
-        grid.innerHTML = `<p class="col-span-full text-center text-gray-400">Koleksi masih kosong. Ayo bermain dan tangkap beberapa Pokémon!</p>`;
-        return;
-    }
-
-    collection.forEach(pokemon => {
-        const card = document.createElement('div');
-        card.className = 'pokedex-card';
-        
-        card.innerHTML = `
-            <img src="${pokemon.image}" alt="${pokemon.name}" class="w-full h-auto">
-            <p class="text-sm font-bold capitalize mt-2">${pokemon.name}</p>
-        `;
-        grid.appendChild(card);
-    });
-}
-
 // Definisikan rentang ID generasi di sini agar UI tahu cara memfilter
 const GEN_FILTER_RANGES = {
     "1": [1, 151], "2": [152, 251], "3": [252, 386], "4": [387, 493], "5": [494, 649],
@@ -96,31 +71,28 @@ const GEN_FILTER_RANGES = {
 
 export function renderAlmanac(allPokemon, filters) {
     const grid = pokedexElements.grid;
-    grid.innerHTML = '<p class="col-span-full text-center">Loading...</p>'; // Tampilkan loading
+    grid.innerHTML = '<p class="col-span-full text-center">Loading...</p>';
     
     const unlockedCollection = getCollection();
     const unlockedIds = new Set(unlockedCollection.map(p => p.id));
 
-    // 1. Terapkan filter generasi
     let filteredPokemon = allPokemon;
     if (filters.generation !== 'all') {
         const [start, end] = GEN_FILTER_RANGES[filters.generation];
         filteredPokemon = allPokemon.filter(p => p.id >= start && p.id <= end);
     }
 
-    // 2. Terapkan filter "Revealed Only"
     if (filters.revealedOnly) {
         filteredPokemon = filteredPokemon.filter(p => unlockedIds.has(p.id));
     }
 
-    grid.innerHTML = ''; // Kosongkan grid
+    grid.innerHTML = '';
 
     if (filteredPokemon.length === 0) {
         grid.innerHTML = `<p class="col-span-full text-center text-gray-400">Tidak ada Pokémon yang cocok dengan filter ini.</p>`;
         return;
     }
 
-    // 3. Render setiap kartu Pokémon
     filteredPokemon.forEach(pokemon => {
         const isUnlocked = unlockedIds.has(pokemon.id);
         const card = document.createElement('div');
