@@ -31,3 +31,29 @@
   pointer-events: none;
   position: absolute;
 }
+
+/* === STYLE BARU UNTUK ALMANAK === */
+
+.pokedex-filter-btn {
+    background-color: #4b5563; /* bg-gray-600 */
+    color: white;
+    padding: 0.25rem 0.75rem; /* px-3 py-1 */
+    border-radius: 9999px; /* rounded-full */
+    font-size: 0.875rem; /* text-sm */
+    transition-duration: 200ms;
+}
+
+.pokedex-filter-btn:hover {
+    background-color: #6b7280; /* bg-gray-500 */
+}
+
+.pokedex-filter-btn.active {
+    background-color: #f59e0b; /* bg-amber-500 */
+    font-weight: bold;
+}
+
+/* Style untuk toggle switch */
+input:checked ~ .dot {
+  transform: translateX(100%);
+  background-color: #f59e0b; /* bg-amber-500 */
+}
