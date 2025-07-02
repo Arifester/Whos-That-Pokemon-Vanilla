@@ -2,13 +2,13 @@
 import './style.css';
 
 // Impor semua modul yang kita butuhkan
+// DIUBAH: Hapus renderPokedex yang sudah tidak dipakai
 import { state, getHighScore, saveHighScore, saveToCollection, getCollection, TOTAL_GUESSES } from './modules/state.js';
-import { getRandomPokemon } from './modules/api.js';
-import { screens, gameElements, menuElements, pokedexElements, gameOverElements, showScreen, updateScoreUI, updateGuessDisplay, renderPokedex } from './modules/ui.js';
+import { getRandomPokemon, fetchAllPokemon } from './modules/api.js';
+import { screens, gameElements, menuElements, pokedexElements, gameOverElements, showScreen, updateScoreUI, updateGuessDisplay, renderAlmanac } from './modules/ui.js';
 
 // === FUNGSI ALUR GAME UTAMA ===
 
-// BARU: Variabel untuk menyimpan ID dari setTimeout
 let nextRoundTimeoutId = null; 
 
 async function nextRound() {
@@ -37,10 +37,8 @@ async function nextRound() {
   shuffledOptions.forEach(option => {
     const button = document.createElement('button');
     button.textContent = option.charAt(0).toUpperCase() + option.slice(1);
-    // DIUBAH: Pastikan tombol diaktifkan kembali
     button.disabled = false;
     button.classList.add('bg-blue-600', 'hover:bg-blue-700', 'text-white', 'p-3', 'rounded-lg', 'transition', 'duration-200');
-    // Hapus style jawaban sebelumnya jika ada
     button.classList.remove('bg-green-500', 'bg-red-500');
     button.addEventListener('click', () => checkAnswer(option));
     gameElements.optionsContainer.appendChild(button);
@@ -99,16 +97,13 @@ function checkAnswer(selectedOption) {
   const isEndlessModeOver = state.gameSettings.mode === 'endless' && selectedOption !== state.correctPokemon.name;
 
   if (isClassicModeOver || isEndlessModeOver) {
-    // DIUBAH: Simpan ID timeout
     nextRoundTimeoutId = setTimeout(endGame, 2000);
   } else {
-    // DIUBAH: Simpan ID timeout
     nextRoundTimeoutId = setTimeout(nextRound, 2000);
   }
 }
 
 function startTimer() {
-  // DIUBAH: Pastikan timer lama selalu bersih sebelum membuat yang baru
   clearInterval(state.timer); 
 
   const DURATION_MAP = { easy: 15, normal: 10, hard: 5 };
@@ -128,7 +123,6 @@ function startTimer() {
 }
 
 function startGame() {
-  // DIUBAH: Tambahkan pembersihan menyeluruh di awal game
   clearInterval(state.timer);
   clearTimeout(nextRoundTimeoutId);
 
@@ -155,7 +149,6 @@ function startGame() {
 }
 
 function endGame() {
-  // DIUBAH: Jadikan endGame sebagai satu-satunya pembersih utama
   clearInterval(state.timer);
   clearTimeout(nextRoundTimeoutId);
   
@@ -171,12 +164,22 @@ function endGame() {
 
 // === INISIALISASI APLIKASI ===
 function init() {
+  let almanacData = [];
+  const almanacFilters = {
+      generation: 'all',
+      revealedOnly: false,
+  };
+
   document.getElementById('quit-game-btn').addEventListener('click', endGame);
   
   menuElements.startGameBtn.addEventListener('click', startGame);
-  menuElements.viewCollectionBtn.addEventListener('click', () => {
-      renderPokedex(getCollection());
-      showScreen('pokedex');
+
+  menuElements.viewCollectionBtn.addEventListener('click', async () => {
+    showScreen('pokedex');
+    if (almanacData.length === 0) {
+        almanacData = await fetchAllPokemon(); 
+    }
+    renderAlmanac(almanacData, almanacFilters); 
   });
 
   pokedexElements.closeBtn.addEventListener('click', () => {
@@ -185,12 +188,26 @@ function init() {
 
   gameOverElements.playAgainBtn.addEventListener('click', startGame);
 
-  // DIUBAH: Tombol Menu Utama sekarang juga harus membersihkan game
   gameOverElements.mainMenuBtn.addEventListener('click', () => {
-    endGame(); // Hentikan dan bersihkan game
-    showScreen('start'); // Baru tampilkan menu utama
-    // Tampilkan high score lagi setelah kembali ke menu
+    endGame(); 
+    showScreen('start');
     menuElements.highScoreDisplay.textContent = getHighScore(); 
+  });
+  
+  const filterButtons = document.querySelectorAll('.pokedex-filter-btn');
+  filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+          almanacFilters.generation = button.dataset.filter;
+          filterButtons.forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+          renderAlmanac(almanacData, almanacFilters);
+      });
+  });
+
+  const toggle = document.getElementById('revealed-only-toggle');
+  toggle.addEventListener('change', (e) => {
+      almanacFilters.revealedOnly = e.target.checked;
+      renderAlmanac(almanacData, almanacFilters);
   });
 
   menuElements.highScoreDisplay.textContent = getHighScore();
