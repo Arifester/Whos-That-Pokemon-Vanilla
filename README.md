@@ -1,7 +1,7 @@
 # Who's That Pokémon
 An interactive web-based guessing game, inspired by the classic segments in the Pokémon anime. Test your knowledge by guessing the silhouette of the Pokémon that appears on screen before time runs out!
 
-✨ Features
+## ✨ Features
 This project has evolved from a simple game into a feature-rich application, built purely with Vanilla JavaScript and Tailwind CSS using the Vite build tool.
 
 - Dual Game Modes:
@@ -21,7 +21,7 @@ This project has evolved from a simple game into a feature-rich application, bui
 
 - Modern & Responsive UI: Built with smooth transitions and clear visual feedback for a more satisfying gameplay experience.
 
-🚀 How to Play
+## 🚀 How to Play
 1. Set Up Your Game: On the main menu, choose your preferred difficulty, game mode, and the Pokémon generations you want to guess from.
 
 2. Start Guessing: Click "Start Playing!". A Pokémon silhouette will appear.
@@ -30,7 +30,7 @@ This project has evolved from a simple game into a feature-rich application, bui
 
 4. Catch 'Em All: Return to the main menu and click "View Collection" to see your progress in the Pokédex Almanac!
 
-🛠️ Tech Stack
+## 🛠️ Tech Stack
 - JavaScript (Vanilla JS): All game logic, DOM manipulation, and API interactions are built without any frameworks.
 
 - Vite: For a blazing-fast development server and build process.
